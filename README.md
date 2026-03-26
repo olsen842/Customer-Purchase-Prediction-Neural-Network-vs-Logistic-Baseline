@@ -32,7 +32,7 @@ Train/test split 80/20 — identical for both models. Feature scaling via Standa
 | Architecture | `5 → 1 (sigmoid)` |
 | Loss | `BCE` |
 | Optimizer | `Adam lr=0.001` |
-| Epochs | `700` |
+| Epochs | `640` |
 
 ### Neural Network *(Best model)*
 
@@ -41,7 +41,7 @@ Train/test split 80/20 — identical for both models. Feature scaling via Standa
 | Architecture | `5 → 16 → 1` |
 | Activation | `ReLU + sigmoid` |
 | Optimizer | `Adam lr=0.001` |
-| Epochs | `700` |
+| Epochs | `640` |
 
 ---
 
