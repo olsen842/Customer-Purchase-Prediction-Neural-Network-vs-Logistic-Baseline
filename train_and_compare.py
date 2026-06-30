@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
+import joblib
 
 
 
@@ -39,8 +40,8 @@ model = nn.Sequential(nn.Linear(5, 16),
 loss_fn = nn.BCELoss()
 optimizer = th.optim.Adam(model.parameters(), lr=0.001)
 
-#change epochs to 700 because we got overfitting after 640 epochs and loss started to increase
-for epoch in range(700):
+#change epochs to 640 because we got overfitting after 640 epochs and loss started to increase
+for epoch in range(640):
     model.train()
     predictions = model(X_train)
     loss = loss_fn(predictions, y_train)
@@ -59,7 +60,7 @@ with th.no_grad():
     preds = (model(X_test) > 0.6).float()
     accuracy = (preds == y_test).float().mean()
 
-    y_predicted_cls = preds.round()
+    y_predicted_cls = preds
 
 
     n_buy = preds.sum().item()
@@ -86,7 +87,7 @@ print(classification_report(y_test_np, y_pred_np, target_names=['Skip', 'Buy']))
 logistic_model = nn.Sequential(nn.Linear(5, 1), nn.Sigmoid())
 lr_optimizer = th.optim.Adam(logistic_model.parameters(), lr=0.001)
 
-for epoch in range(700):
+for epoch in range(640):
     logistic_model.train()
     lr_preds = logistic_model(X_train)
     lr_loss = loss_fn(lr_preds, y_train)
@@ -99,52 +100,28 @@ with th.no_grad():
     lr_test_preds = (logistic_model(X_test) > 0.6).float()
     lr_accuracy = (lr_test_preds == y_test).float().mean()
     lr_final_loss = lr_loss.item()
-    lr_y_predicted_cls = lr_test_preds.round()
+    lr_y_predicted_cls = lr_test_preds
 
 
 
     print(f"\n--- Logistic Regression Results ---")
     print(f"Accuracy: {lr_accuracy.item() * 100:.2f}%")
 
-    lr_pred_np = lr_y_predicted_cls.cpu().numpy().ravel()
+    lr_pred_np = lr_y_predicted_cls.cpu().numpy().ravel().astype(int)
     print("\nLogistic Regression Classification Report:")
     print(classification_report(y_test_np, lr_pred_np, target_names=['Skip', 'Buy']))
+
+
+joblib.dump(scaler, 'scaler.pkl')
+
+th.save(logistic_model.state_dict(), 'logistic_model.pth')
+
+th.save(model.state_dict(), 'neural_net_model.pth')
+
+
 
 
 print("\n--- Model Comparison ---")
 print(f"{'Model':<15} | {'Accuracy':<10} | {'Final Loss':<10}")
 print(f"{'Neural Net':<15} | {nn_accuracy*100:.2f}%      | {nn_final_loss:.4f}")
 print(f"{'Logistic Reg':<15} | {lr_accuracy.item()*100:.2f}%      | {lr_final_loss:.4f}")
-
-
-
-#first score Final Loss: 4.0224
-#second score Final Loss: 0.3285 after i added standartscaler 
-#third score  Accuracy: 89.20%
-#Number of buyers predicted: 209.0
-#Number of skips predicted: 291
-#Final Loss: 0.3218
-
-#after training spilt addede
-# Accuracy: 86.00%
-#Number of buyers predicted: 43.0
-#Number of skips predicted: 57
-#Final Loss: 0.3069
-
-#after i added hidden layer and relu activation function
-# Accuracy: 87.00%
-#Number of buyers predicted: 44.0
-#Number of skips predicted: 56
-#Final Loss: 0.2831
-
-#fix 3
-# i have added the Logistic Regression model back
-# so i can comapre the performance of the neural network VS logistic regression.
-# the results:
-# Model           | Accuracy   | Final Loss
-#Neural Net      | 85.00%      | 0.2207
-#Logistic Reg    | 75.00%      | 0.3969
-# so the neural network outperformed logistic regression in 
-# both accuracy and final loss, which suggests that the added 
-# complexity of the neural network is helping it capture patterns in the data that 
-# logistic regression is missing.
